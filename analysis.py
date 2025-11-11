@@ -42,7 +42,7 @@ def blink_led(bit=1, duration=0.05):
 
 def trng(bits=512):
     """Redfine your trng function from trng.py here"""
-    def von_neumann(bits):
+    def von_neumann(bits):  # Extra credit
         output = []
 
         for i in range(0, (len(bits)-1), 2):
@@ -58,7 +58,7 @@ def trng(bits=512):
 
     while count <= bits:
         if lgpio.gpio_read(chip, PIN_INPUT) == 1:
-            timestamp.append(int(time.time_ns()))
+            timestamp.append(time.time_ns())
             count += 1
 
     for i in range(len(timestamp)-1):
@@ -69,7 +69,7 @@ def trng(bits=512):
         extract = i & 1
         raw.append(extract)
 
-    debiased = von_neumann(raw)
+    debiased = von_neumann(raw)  # Extra credit
 
     for i in debiased:
         blink_led(i)
@@ -77,7 +77,7 @@ def trng(bits=512):
 
     return debiased
 
-def lfsr():
+def lfsr(seed=0b100111, taps=(5, 4), n_bits=6, n_values=63):
     """Redefine your lfsr function from lfsr_prng.py"""
     import random
 
@@ -104,10 +104,86 @@ def lfsr():
 def entropy(data):
     """Shannon entropy (bits per symbol)."""
     """TODO"""
+    count0, count1 = 0, 0
+
+    for i in data:
+        if i == 0:
+            count0 += 1
+        if i == 1:
+            count1 += 1
+    
+    p0 = count0/len(data)
+    p1 = count1/len(data)
+
+    if p0 == 0 or p1 == 0:
+        h = 0
+    else:
+        h = -p0*math.log2(p0) - p1*math.log2(p1)
+
+    return h
 
 def autocorrelation(bits):
     """Compute lag-1 autocorrelation coefficient."""
     "TODO"
+    bits = np.array(bits)
+
+    cov = np.sum((bits[:-1] - np.mean(bits))*(bits[1:] - np.mean(bits)))
+    var = np.sum((bits - np.mean(bits))**2)
+    
+    if var == 0.0:
+        coeff = 0
+    else:
+        coeff = cov/var
+
+    return coeff
+
+def monobit(bits):  # Extra credit
+    count0, count1 = 0, 0
+
+    for i in bits:
+        if i == 0:
+            count0 += 1
+        if i == 1:
+            count1 += 1
+    
+    p = count1/len(bits)
+    z = (count1-count0)/math.sqrt(len(bits))
+
+    return count0, count1, p, z
+
+def runs(bits):  # Extra credit
+    countrun0 = 0
+    countrun1 = 0
+
+    if bits[-1] == 0:
+        countrun0 += 1
+    elif bits[-1] == 1:
+        countrun1 += 1
+
+    for i in range(0, (len(bits)-1)):
+        if bits[i] == 0 and bits[i+1] == 1:
+            countrun0 += 1
+        elif bits[i] == 1 and bits[i+1] == 0:
+            countrun1 += 1
+    
+    totrun = countrun0 + countrun1
+
+    return countrun0, countrun1, totrun
+
+def autocorrelation_mult(bits):  # Extra credit
+    bits = np.array(bits)
+    coeff = []
+
+    for i in range(0, 11):
+        cov = np.sum((bits[:-i] - np.mean(bits))*(bits[i:] - np.mean(bits)))
+        var = np.sum((bits - np.mean(bits))**2)
+    
+        if var == 0.0:
+            coeff[i] = 0
+        else:
+            coeff[i] = cov/var
+
+    return coeff
 
 def plot_comparison(prng_bits, trng_bits, H_prng, H_trng):
     plt.figure(figsize=(10, 4))

@@ -38,7 +38,7 @@ def blink_led(bit, duration=0.02):
 def trng(bits=NUM_BITS):
     """Collect entropy via GPIO jitter."""
     """TODO"""
-    def von_neumann(bits):
+    def von_neumann(bits):  # Extra credit
         output = []
 
         for i in range(0, (len(bits)-1), 2):
@@ -54,7 +54,7 @@ def trng(bits=NUM_BITS):
 
     while count <= bits:
         if lgpio.gpio_read(chip, PIN_INPUT) == 1:
-            timestamp.append(int(time.time_ns()))
+            timestamp.append(time.time_ns())
             count += 1
 
     for i in range(len(timestamp)-1):
@@ -65,7 +65,7 @@ def trng(bits=NUM_BITS):
         extract = i & 1
         raw.append(extract)
 
-    debiased = von_neumann(raw)
+    debiased = von_neumann(raw)  # Extra credit
 
     for i in debiased:
         blink_led(i)
