@@ -42,7 +42,7 @@ def blink_led(bit=1, duration=0.05):
 
 def trng(bits=512):
     """Redfine your trng function from trng.py here"""
-    def von_neumann(bits):  # Extra credit
+    def von_neumann(bits):  # Extra credit (define von_neumann function)
         output = []
 
         for i in range(0, (len(bits)-1), 2):
@@ -69,13 +69,13 @@ def trng(bits=512):
         extract = i & 1
         raw.append(extract)
 
-    debiased = von_neumann(raw)  # Extra credit
+    debiased = von_neumann(raw)  # The output list is using von_neumann function
 
     for i in debiased:
         blink_led(i)
         time.sleep(0.05)
 
-    return debiased
+    return debiased  # Return the debiased output list (always have fewer than 512 values)
 
 def lfsr(seed=0b100111, taps=(5, 4), n_bits=6, n_values=63):
     """Redefine your lfsr function from lfsr_prng.py"""
@@ -137,7 +137,7 @@ def autocorrelation(bits):
 
     return coeff
 
-def monobit(bits):  # Extra credit
+def monobit(bits):  # Extra credit - Monobit frequency test
     count0, count1 = 0, 0
 
     for i in bits:
@@ -149,9 +149,9 @@ def monobit(bits):  # Extra credit
     p = count1/len(bits)
     z = (count1-count0)/math.sqrt(len(bits))
 
-    return count0, count1, p, z
+    return [count0, count1, p, z]  # Return number of 0s, number of 1s, proportion, and z-score
 
-def runs(bits):  # Extra credit
+def runs(bits):  # Extra credit - Runs test
     countrun0 = 0
     countrun1 = 0
 
@@ -168,9 +168,9 @@ def runs(bits):  # Extra credit
     
     totrun = countrun0 + countrun1
 
-    return countrun0, countrun1, totrun
+    return [countrun0, countrun1, totrun]  # Return number of runs of 0s, number of runs of 1s, and total number of runs
 
-def autocorrelation_mult(bits):  # Extra credit
+def autocorrelation_mult(bits):  # Extra credit - Autocorrelation for multiple lags
     bits = np.array(bits)
     coeff = []
 
@@ -183,7 +183,7 @@ def autocorrelation_mult(bits):  # Extra credit
         else:
             coeff[i] = cov/var
 
-    return coeff
+    return coeff  # Return lag-0 to lag-10 autocorrelation coefficients
 
 def plot_comparison(prng_bits, trng_bits, H_prng, H_trng):
     plt.figure(figsize=(10, 4))
@@ -218,6 +218,25 @@ def main():
 
     print(f"PRNG Entropy = {H_prng:.3f} bits/bit,  Autocorr = {R_prng:.3f}")
     print(f"TRNG Entropy = {H_trng:.3f} bits/bit,  Autocorr = {R_trng:.3f}\n")
+
+    # --- The additional tests start from here ---
+    monobit_prng = monobit(prng_bits)  # Compute monobit frequency tests
+    monobit_trng = monobit(trng_bits)
+    runs_prng = runs(prng_bits)  # Compute runs tests
+    runs_trng = runs(trng_bits)
+    Rmulti_prng = autocorrelation_mult(prng_bits)  # Compute autocorrelation for multiple lags
+    Rmulti_trng = autocorrelation_mult(trng_bits)
+
+    # Print results from the tests
+    print("PRNG:")
+    print(f"Monobit frequency test: Number of 0s = {monobit_prng[0]}; Number of 1s = {monobit_prng[1]}; Proportion = {monobit_prng[2]}; z-score = {monobit_prng[3]}")
+    print(f"Runs test: Number of runs of 0s = {runs_prng[0]}; Number of runs of 1s = {runs_prng[1]}; Total runs = {runs_prng[2]}")
+    print(f"Autocorrelations for multiple lags (lag-0 to lag-10): {Rmulti_prng}\n")
+    print("TRNG:")
+    print(f"Monobit frequency test: Number of 0s = {monobit_trng[0]}; Number of 1s = {monobit_trng[1]}; Proportion = {monobit_trng[2]}; z-score = {monobit_trng[3]}")
+    print(f"Runs test: Number of runs of 0s = {runs_trng[0]}; Number of runs of 1s = {runs_trng[1]}; Total runs = {runs_trng[2]}")
+    print(f"Autocorrelations for multiple lags (lag-0 to lag-10): {Rmulti_trng}\n")
+    # --- The additional tests stop here ---
 
     plot_comparison(prng_bits, trng_bits, H_prng, H_trng)
 

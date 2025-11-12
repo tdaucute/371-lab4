@@ -38,7 +38,7 @@ def blink_led(bit, duration=0.02):
 def trng(bits=NUM_BITS):
     """Collect entropy via GPIO jitter."""
     """TODO"""
-    def von_neumann(bits):  # Extra credit
+    def von_neumann(bits):  # Extra credit (define von_neumann function)
         output = []
 
         for i in range(0, (len(bits)-1), 2):
@@ -65,13 +65,13 @@ def trng(bits=NUM_BITS):
         extract = i & 1
         raw.append(extract)
 
-    debiased = von_neumann(raw)  # Extra credit
+    debiased = von_neumann(raw)  # The output list is using von_neumann function
 
     for i in debiased:
         blink_led(i)
         time.sleep(0.05)
 
-    return debiased
+    return debiased  # Return the debiased output list (always have fewer than 512 values)
 
 
 def main():
